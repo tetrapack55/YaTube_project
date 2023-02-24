@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %} 
+  Моя лента
+{% endblock %}
+ 
+{% block content %} 
+<h1>Моя лента</h1>
+<div>
+  {% include 'includes/switcher.html' %}
+  {% for post in page_obj %}
+    {% include 'includes/post.html' with show_profile_link=True show_group_link=True %}
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+<center><h1>Привет, я автор</h1></center>
+<p>
+  <div class='row'>
+    <div class='col-4'>
+      <center>
+        <img src="{% static 'img/photo.jpg' %}" width='350' height='480'>
+        <p class="h2">
+          <b><i>Олег Кирьянов</i></b>
+        </p>
+      </center>
+    </div>
+    <div class='col-8'>
+      <h4 style='background: blue; color: white'>Информация</h4>
+      <p style="font-size: 20px; font-family: monospace;">
+        Я являюсь автором этого сайта. Мне 35 лет, женат, есть сын.<br>
+        Люблю путешествовать, слушать музыку, смотреть футбол и хоккей. <br>
+        Начал изучать Джанго на Питоне совсем недавно, поэтому прошу строго не судить. 
+        Очень нравится писать код и верстать страницы. Это безумно интересно!
+        Хочется чтобы в сутках было больше часов, чтобы все это успеть изучить, как можно раньше!<br> 
+        В изучении выручает Coding Music или белый шум в наушниках, кофе и своевременные перерывы.
+      </p>
+      <h4 style='background: blue; color: white'>Ссылки</h4>
+      <ul>
+        <li style="font-size: 20px; font-family: monospace;">
+          <a href="https://github.com/tetrapack55?tab=repositories">Мои проекты на GitHub</a>
+        </li>
+        <li style="font-size: 20px; font-family: monospace;">
+          <a href="mailto:xagatgx@yandex.ru">Написать письмо</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</p>
+{% endblock %} 

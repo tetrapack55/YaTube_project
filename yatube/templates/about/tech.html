@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Технологии{% endblock %}
+{% block content %}
+<div class="row">
+  <h1>Вот что я умею</h1>
+  
+  <aside class="col-12 col-md-3">
+    <ul class="list-group list-group-flush" style="font-size: 25px; font-family: sans-serif;">
+      <li class="list-group-item">
+        <img src="{% static 'img/python.png' %}">  Python
+      </li>
+      <li class="list-group-item">
+        <img src="{% static 'img/django.png' %}">  Django
+      </li>
+    </ul>
+  </aside>
+  
+  <article class="col-12 col-md-9">
+    <p style="font-size: 25px; font-family: sans-serif;">
+      В создании этого сайта я использовал ООП языка Пайтон и фреймворк Джанго.<br>
+      Применял основы верстки страниц, использовал стили CSS и стили из фреймворка Bootstrap.<br>
+      Работал с базами данных с помощью Джанго ORM.<br> 
+      Использовал контекстный процесор, декораторы и пейджинатор<br>
+      Код писал в VS Code, некоторую часть в Python Shell.<br>
+      <center>
+        <video autoplay loop>
+          <source src="{% static 'img/hacker.mp4' %}" type="video/mp4">
+        </video> 
+      </center>
+    </p>
+  </article>
+</div>
+{% endblock %}
