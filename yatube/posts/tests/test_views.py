@@ -9,7 +9,6 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from posts.models import Follow, Group, Post, User
-from posts.utils import POSTS_LIMIT
 from .constants import (
     MAIN_URL_NAME,
     GROUP_URL_NAME,
@@ -17,11 +16,6 @@ from .constants import (
     POST_DETAIL_URL_NAME,
     POST_CREATE_URL_NAME,
     POST_EDIT_URL_NAME,
-    MAIN_TEMPL,
-    GROUP_TEMPL,
-    PROFILE_TEMPL,
-    POST_DETAIL_TEMPL,
-    POST_CREATE_TEMPL,
     SMALL_GIF,
 )
 
@@ -60,6 +54,15 @@ class PostViewsTests(TestCase):
             group=cls.group,
             image=uploaded
         )
+        cls.MAIN_URL = reverse(MAIN_URL_NAME)
+        cls.GROUP_URL = reverse(
+            GROUP_URL_NAME,
+            kwargs={'slug': cls.group.slug}
+        )
+        cls.PROFILE_URL = reverse(
+            PROFILE_URL_NAME,
+            kwargs={'username': cls.post.author}
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -72,63 +75,21 @@ class PostViewsTests(TestCase):
         self.authorized_client.force_login(self.user)
         cache.clear()
 
-    def test_pages_use_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
-        templates_url_names = {
-            reverse(MAIN_URL_NAME): MAIN_TEMPL,
-            reverse(
-                GROUP_URL_NAME,
-                kwargs={'slug': self.group.slug}
-            ): GROUP_TEMPL,
-            reverse(
-                PROFILE_URL_NAME,
-                kwargs={'username': self.post.author}
-            ): PROFILE_TEMPL,
-            reverse(
-                POST_DETAIL_URL_NAME,
-                kwargs={'post_id': self.post.pk}
-            ): POST_DETAIL_TEMPL,
-            reverse(POST_CREATE_URL_NAME): POST_CREATE_TEMPL,
-            reverse(
-                POST_EDIT_URL_NAME,
-                kwargs={'post_id': self.post.pk}
-            ): POST_CREATE_TEMPL,
-        }
-        for reverse_name, template in templates_url_names.items():
-            with self.subTest(template=template):
-                response = self.authorized_client.get(reverse_name)
-                self.assertTemplateUsed(response, template)
-
-    def test_home_page_show_correct_context(self):
-        """Шаблон index сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse(MAIN_URL_NAME))
-        first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.author, self.user)
-        self.assertEqual(first_object.text, self.post.text)
-        self.assertEqual(first_object.group.title, self.group.title)
-        self.assertEqual(first_object.image, self.post.image)
-
-    def test_group_list_page_show_correct_context(self):
-        """Шаблон group_list сформирован с правильным контекстом."""
-        response = (self.authorized_client.get(
-            reverse(GROUP_URL_NAME, kwargs={'slug': 'test-group'})))
-        self.assertEqual(response.context.get('group').title, self.group.title)
-        self.assertEqual(
-            response.context.get('group').description,
-            self.group.description
-        )
-        self.assertEqual(response.context.get('group').slug, self.group.slug)
-        self.assertEqual(response.context.get('post').image, self.post.image)
-
-    def test_profile_page_show_correct_context(self):
-        """Шаблон profile сформирован с правильным контекстом."""
-        response = (self.authorized_client.get(
-            reverse(PROFILE_URL_NAME, kwargs={'username': self.post.author})))
-        first_object = response.context['page_obj'][0]
-        self.assertEqual(first_object.author, self.user)
-        self.assertEqual(first_object.text, self.post.text)
-        self.assertEqual(first_object.group.title, self.group.title)
-        self.assertEqual(first_object.image, self.post.image)
+    def test_pages_show_correct_context(self):
+        """Шаблоны страниц index, group и profile
+        сформированы с правильным контекстом"""
+        pages = (self.MAIN_URL, self.GROUP_URL, self.PROFILE_URL)
+        for url in pages:
+            with self.subTest(url=url):
+                response = self.authorized_client.get(url)
+                first_object = response.context['page_obj'][0]
+                self.assertEqual(first_object.text, self.post.text)
+                self.assertEqual(first_object.image, self.post.image)
+                self.assertEqual(first_object.group.title, self.group.title)
+                self.assertEqual(first_object.group.slug, self.group.slug)
+                self.assertEqual(first_object.group.description,
+                                 self.group.description)
+                self.assertEqual(first_object.author, self.post.author)
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -259,7 +220,7 @@ class PaginatorViewsTest(TestCase):
         cache.clear()
 
     def test_page_contains_ten_records(self):
-        POSTS_ON_FIRST = POSTS_LIMIT
+        POSTS_ON_FIRST = 10
         POSTS_ON_SECOND = self.POST_TOTAL - POSTS_ON_FIRST
         pages = (
             (1, POSTS_ON_FIRST),

@@ -8,12 +8,16 @@ POST_CREATE_URL_NAME = 'posts:post_create'
 POST_EDIT_URL_NAME = 'posts:post_edit'
 LOGIN_URL_NAME = 'users:login'
 ADD_COMMENT_URL_NAME = 'posts:add_comment'
+FOLLOW_INDEX_URL_NAME = 'posts:follow_index'
+PROFILE_FOLLOW_URL_NAME = 'posts:profile_follow'
+PROFILE_UNFOLLOW_URL_NAME = 'posts:profile_unfollow'
 
 MAIN_TEMPL = 'posts/index.html'
 GROUP_TEMPL = 'posts/group_list.html'
 PROFILE_TEMPL = 'posts/profile.html'
 POST_DETAIL_TEMPL = 'posts/post_detail.html'
 POST_CREATE_TEMPL = 'posts/create_post.html'
+FOLLOW_TEMPL = 'posts/follow.html'
 
 NONEXIST_URL = '/nonexist/'
 LOGIN_NEXT_CREATE_URL = (

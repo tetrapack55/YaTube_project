@@ -9,58 +9,60 @@ from .utils import paginate
 
 @cache_page(20, key_prefix='index_page')
 def index(request):
-    template = 'posts/index.html'
     posts = Post.objects.select_related('author', 'group')
-    page_obj = paginate(request, posts)
-    context = {
-        'posts': posts,
-        'page_obj': page_obj,
-    }
-    return render(request, template, context)
+    return render(
+        request,
+        'posts/index.html',
+        {'posts': posts, 'page_obj': paginate(request, posts)}
+    )
 
 
 def group_posts(request, slug):
-    template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.select_related('author', 'group')
-    page_obj = paginate(request, posts)
-    context = {
-        'group': group,
-        'page_obj': page_obj,
-    }
-    return render(request, template, context)
+    return render(
+        request,
+        'posts/group_list.html',
+        {
+            'group': group,
+            'page_obj': paginate(
+                request,
+                group.posts.select_related('author', 'group')
+            )
+        }
+    )
 
 
 def profile(request, username):
-    template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
-    posts = author.posts.select_related('author', 'group')
-    following = Follow.objects.filter(
-        user=request.user.id, author=author)
-    page_obj = paginate(request, posts)
-    context = {
-        'author': author,
-        'posts': posts,
-        'page_obj': page_obj,
-        'following': following
-    }
-    return render(request, template, context)
+    return render(
+        request,
+        'posts/profile.html',
+        {
+            'author': author,
+            'page_obj': paginate(
+                request,
+                author.posts.select_related('author', 'group')
+            ),
+            'following': (
+                request.user.is_authenticated and Follow.objects.filter(
+                    user=request.user.id, author=author
+                ).exists()
+            )
+        }
+    )
 
 
 def post_detail(request, post_id):
-    template = 'posts/post_detail.html'
     post = get_object_or_404(
         Post.objects.select_related('author', 'group'),
         pk=post_id
     )
     form = CommentForm(request.POST or None)
-    comments = post.comments.select_related('author')
-    context = {
-        'post': post,
-        'form': form,
-        'comments': comments,
-    }
-    return render(request, template, context)
+    return render(
+        request,
+        'posts/post_detail.html',
+        {'post': post, 'form': form}
+    )
 
 
 @login_required
@@ -85,23 +87,22 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
-    template = 'posts/create_post.html'
     post = get_object_or_404(Post, pk=post_id)
     form = PostForm(
         request.POST or None,
         files=request.FILES or None,
         instance=post
     )
-    context = {
-        'form': form,
-        'is_edit': True
-    }
     if post_id and request.user != post.author:
         return redirect('posts:post_detail', post_id=post_id)
     if form.is_valid():
         form.save()
         return redirect('posts:post_detail', post_id=post_id)
-    return render(request, template, context)
+    return render(
+        request,
+        'posts/create_post.html',
+        {'form': form, 'is_edit': True}
+    )
 
 
 @login_required
@@ -120,27 +121,25 @@ def add_comment(request, post_id):
 def follow_index(request):
     posts = Post.objects.select_related('author', 'group').filter(
         author__following__user=request.user)
-    page_obj = paginate(request, posts)
-    context = {'page_obj': page_obj}
-    return render(request, 'posts/follow.html', context)
+    return render(
+        request,
+        'posts/follow.html',
+        {'page_obj': paginate(request, posts)}
+    )
 
 
 @login_required
 def profile_follow(request, username):
-    follower = request.user
     following = get_object_or_404(User, username=username)
-    is_followed = Follow.objects.filter(user=follower, author=following)
-    if follower == following or is_followed.exists():
-        return redirect('posts:profile', username)
-    Follow.objects.create(user=follower, author=following)
+    if request.user != following:
+        Follow.objects.get_or_create(user=request.user, author=following)
     return redirect('posts:profile', username)
 
 
 @login_required
 def profile_unfollow(request, username):
-    get_object_or_404(
-        Follow,
-        user=request.user,
-        author__username=username
-    ).delete()
-    return redirect("posts:profile", username)
+    author = get_object_or_404(User, username=username)
+    follow = Follow.objects.filter(user=request.user, author=author)
+    if follow.exists():
+        follow.delete()
+    return redirect('posts:profile', username)

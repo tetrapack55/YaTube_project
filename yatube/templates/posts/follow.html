@@ -7,7 +7,7 @@
 {% block content %} 
 <h1>Моя лента</h1>
 <div>
-  {% include 'includes/switcher.html' %}
+  {% include 'includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
     {% include 'includes/post.html' with show_profile_link=True show_group_link=True %}
     {% if not forloop.last %}<hr>{% endif %}

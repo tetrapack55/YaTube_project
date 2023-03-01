@@ -65,6 +65,7 @@ class PostFormTests(TestCase):
             content=SMALL_GIF,
             content_type='image/gif'
         )
+        UPLOADED_DIR = f'posts/{uploaded}'
         form_data = {
             'text': 'Test text',
             'group': self.group.pk,
@@ -79,7 +80,7 @@ class PostFormTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
-        self.assertEqual(post.image, f'posts/{uploaded}')
+        self.assertEqual(post.image, UPLOADED_DIR)
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertRedirects(
             response, reverse(PROFILE_URL_NAME, kwargs={'username': self.user})

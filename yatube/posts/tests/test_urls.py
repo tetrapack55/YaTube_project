@@ -13,12 +13,17 @@ from .constants import (
     POST_CREATE_URL_NAME,
     POST_EDIT_URL_NAME,
     LOGIN_URL_NAME,
+    ADD_COMMENT_URL_NAME,
+    FOLLOW_INDEX_URL_NAME,
+    PROFILE_FOLLOW_URL_NAME,
+    PROFILE_UNFOLLOW_URL_NAME,
     MAIN_TEMPL,
     GROUP_TEMPL,
     PROFILE_TEMPL,
     POST_DETAIL_TEMPL,
     POST_CREATE_TEMPL,
     LOGIN_NEXT_CREATE_URL,
+    FOLLOW_TEMPL,
     NONEXIST_URL
 )
 
@@ -57,6 +62,19 @@ class PostURLTests(TestCase):
             POST_EDIT_URL_NAME,
             kwargs={'post_id': cls.post.pk}
         )
+        cls.ADD_COMMENT_URL = reverse(
+            ADD_COMMENT_URL_NAME,
+            kwargs={'post_id': cls.post.pk}
+        )
+        cls.FOLLOW_INDEX_URL = reverse(FOLLOW_INDEX_URL_NAME)
+        cls.PROFILE_FOLLOW_URL = reverse(
+            PROFILE_FOLLOW_URL_NAME,
+            kwargs={'username': cls.post.author}
+        )
+        cls.PROFILE_UNFOLLOW_URL = reverse(
+            PROFILE_UNFOLLOW_URL_NAME,
+            kwargs={'username': cls.post.author}
+        )
 
     def setUp(self):
         self.guest_client = Client()
@@ -72,7 +90,14 @@ class PostURLTests(TestCase):
             (self.PROFILE_URL, self.guest_client, HTTPStatus.OK),
             (self.POST_DETAIL_URL, self.guest_client, HTTPStatus.OK),
             (NONEXIST_URL, self.guest_client, HTTPStatus.NOT_FOUND),
-            (self.POST_CREATE_URL, self.authorized_client, HTTPStatus.OK)
+            (self.POST_CREATE_URL, self.authorized_client, HTTPStatus.OK),
+            (self.POST_EDIT_URL, self.authorized_client, HTTPStatus.OK),
+            (self.ADD_COMMENT_URL, self.authorized_client, HTTPStatus.FOUND),
+            (self.FOLLOW_INDEX_URL, self.authorized_client, HTTPStatus.OK),
+            (self.PROFILE_FOLLOW_URL, self.authorized_client,
+                HTTPStatus.FOUND),
+            (self.PROFILE_UNFOLLOW_URL, self.authorized_client,
+                HTTPStatus.FOUND)
         )
         for url, client, status_code in pages:
             with self.subTest(url=url):
@@ -94,7 +119,15 @@ class PostURLTests(TestCase):
         pages = (
             (self.POST_CREATE_URL, LOGIN_NEXT_CREATE_URL),
             (self.POST_EDIT_URL,
-                reverse(LOGIN_URL_NAME) + '?next=' + self.POST_EDIT_URL)
+                reverse(LOGIN_URL_NAME) + '?next=' + self.POST_EDIT_URL),
+            (self.ADD_COMMENT_URL,
+                reverse(LOGIN_URL_NAME) + '?next=' + self.ADD_COMMENT_URL),
+            (self.FOLLOW_INDEX_URL,
+                reverse(LOGIN_URL_NAME) + '?next=' + self.FOLLOW_INDEX_URL),
+            (self.PROFILE_FOLLOW_URL,
+                reverse(LOGIN_URL_NAME) + '?next=' + self.PROFILE_FOLLOW_URL),
+            (self.PROFILE_UNFOLLOW_URL,
+                reverse(LOGIN_URL_NAME) + '?next=' + self.PROFILE_UNFOLLOW_URL)
         )
         for page, url in pages:
             with self.subTest(page=page):
@@ -109,7 +142,8 @@ class PostURLTests(TestCase):
             self.PROFILE_URL: PROFILE_TEMPL,
             self.POST_DETAIL_URL: POST_DETAIL_TEMPL,
             self.POST_CREATE_URL: POST_CREATE_TEMPL,
-            self.POST_EDIT_URL: POST_CREATE_TEMPL
+            self.POST_EDIT_URL: POST_CREATE_TEMPL,
+            self.FOLLOW_INDEX_URL: FOLLOW_TEMPL
         }
         for url_name, template in templates_urls.items():
             with self.subTest(url_name=url_name):

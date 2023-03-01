@@ -37,7 +37,9 @@ class Post(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date']
+        verbose_name = 'Публикация пользователя'
+        verbose_name_plural = 'Публикации пользователей'
+        ordering = ('-pub_date', )
 
     def __str__(self) -> str:
         return self.text[:15]
@@ -46,10 +48,17 @@ class Post(models.Model):
 class Group(models.Model):
     title = models.CharField(
         max_length=200,
-        verbose_name='Название'
+        verbose_name='Название группы'
     )
-    slug = models.SlugField(unique=True)
-    description = models.TextField(verbose_name='Описание')
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Адрес группы'
+    )
+    description = models.TextField(verbose_name='Описание группы')
+
+    class Meta:
+        verbose_name = 'Сообщество пользователей'
+        verbose_name_plural = 'Сообщества пользователей'
 
     def __str__(self) -> str:
         return self.title
@@ -78,7 +87,9 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ['-created']
+        verbose_name = 'Комментарий пользователя'
+        verbose_name_plural = 'Комментарии пользователей'
+        ordering = ('-created', )
 
     def __str__(self) -> str:
         return self.text[:15]
@@ -97,3 +108,13 @@ class Follow(models.Model):
         related_name='following',
         verbose_name='Автор'
     )
+
+    class Meta:
+        verbose_name = 'Подписки пользователя'
+        verbose_name_plural = 'Подписки пользователей'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_user_author'
+            )
+        ]
